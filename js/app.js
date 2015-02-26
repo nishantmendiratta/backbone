@@ -1,1 +1,56 @@
-/** * anonymous function which we invoke immediately, * @param  {[type]} $ [aliasing jQuery as the $ character] * @return {[type]}   [object,Also defined at this stage is an array of objects where each object represents a contact] */(function ($) {   var contacts = [   { name: "Contact 1", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "family" },   { name: "Contact 2", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "family" },   { name: "Contact 3", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "friend" },   { name: "Contact 4", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "colleague" },   { name: "Contact 5", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "family" },   { name: "Contact 6", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "colleague" },   { name: "Contact 7", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "friend" },   { name: "Contact 8", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "family" }   ];}(jQuery));//this will be an individual contact, which will have attributes such as a name, a contact number, etcvar Contact = Backbone.Model.extend({    defaults: {        photo:"/img/placeholder.png"    }});//A collection is a class for managing groups of models. We'll use a simple one in this example to store all of our contacts./*We use the model property to tell the collection what class each item in the collection should be built from,   which in this case is an instance of our Contact model. */var Directory = Backbone.Collection.extend({    model: Contact});//Views are responsible for displaying the data of the application in an HTML page. var ContactView = Backbone.View.extend({        //The tagName property is used to specify the container for the view    tagName: "article",    //The className properties specifies a class name that is added to this container    className: "contact-container",        //Template property stores a cached reference to the template, which we select from the page using jQuery    template: $("#contactTemplate").html(),    //This is so that we can chain other Backbone methods to the view instance after calling its render() method    render: function(){      //Storing a reference to Underscore's template() method and pass to it the stored template      /*When passed a single argument containing a template Underscore doesn't invoke it immediately but         will return a method that can be called in order to actually render the template      */      var tmpl = _.template(this.template);      //Setting the HTML content of the <article>       //element created by the view to the interpolated template using jQuery's html() method for convenience      /*Calling the templating function that Underscore returned previously and         passing it the data to interpolate. The data is obtained from the model using Backbone's toJSON()  method on the model       */      //Interpolating just means that the tokens within the template are replaced with actual data      /*we use $el to set the HTML content; this is a cached jQuery object         representing the current element so that we don’t have to keep creating new jQuery objects.      */      this.$el.html(tmpl(this.model.toJSON()));      //render() method, we return the this object, which points to the view instance that the render() method is called on      return this;    }});
+(function ($) {
+    //demo data
+    var contacts = [
+    { name: "Contact 1", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "family" },
+    { name: "Contact 2", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "family" },
+    { name: "Contact 3", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "friend" },
+    { name: "Contact 4", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "colleague" },
+    { name: "Contact 5", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "family" },
+    { name: "Contact 6", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "colleague" },
+    { name: "Contact 7", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "friend" },
+    { name: "Contact 8", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "family" }
+    ];
+    //define product model
+    var Contact = Backbone.Model.extend({
+        defaults: {
+            photo: "./img/placeholder.png"
+        }
+    });
+    //define directory collection
+    var Directory = Backbone.Collection.extend({
+        model: Contact
+    });
+    //define individual contact view
+    var ContactView = Backbone.View.extend({
+        tagName: "article",
+        className: "contact-container",
+        template: $("#contactTemplate").html(),
+        render: function () {
+            var tmpl = _.template(this.template);
+            $(this.el).html(tmpl(this.model.toJSON()));
+            return this;
+        }
+    });
+    //define master view
+    var DirectoryView = Backbone.View.extend({
+        el: $("#contacts"),
+        initialize: function () {
+            this.collection = new Directory(contacts);
+            this.render();
+        },
+        render: function () {
+            var that = this;
+            _.each(this.collection.models, function (item) {
+                that.renderContact(item);
+            }, this);
+        },
+        renderContact: function (item) {
+            var contactView = new ContactView({
+                model: item
+            });
+            this.$el.append(contactView.render().el);
+        }
+    });
+    //create instance of master view
+    var directory = new DirectoryView();
+} (jQuery));
